@@ -1,0 +1,45 @@
+name: dhapi-automation-show-balance
+
+on:
+  schedule:
+    - cron: '45 09 * * 5'
+
+jobs:
+  dhapi-automation-show-balance:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup credential
+        env:
+          DHAPI_USERNAME: ${{ secrets.DHAPI_USERNAME }}
+          DHAPI_PASSWORD: ${{ secrets.DHAPI_PASSWORD }}
+        run: |
+          mkdir -p ~/.dhapi
+          echo "[default]" > ~/.dhapi/credentials
+          echo "username = \"$DHAPI_USERNAME\"" >> ~/.dhapi/credentials
+          echo "password = \"$DHAPI_PASSWORD\"" >> ~/.dhapi/credentials
+      - name: Setup python
+        id: dhapi
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install requirements
+        run: |
+          python -m pip install -r requirements.txt
+      - name: Show Balance
+        id: dhapi_show_balance
+        run: |
+          {
+            echo "SHOW_BALANCE<<EOF"
+            python buyer.py show-balance
+            echo EOF
+          } >> $GITHUB_OUTPUT
+      - name: Send result
+        uses: appleboy/discord-action@master
+        with:
+          webhook_id: ${{ secrets.WEBHOOK_ID }}
+          webhook_token: ${{ secrets.WEBHOOK_TOKEN }}
+          message: "Your money: ${{ steps.dhapi_show_balance.outputs.SHOW_BALANCE }}"
