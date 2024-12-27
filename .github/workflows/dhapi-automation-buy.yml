@@ -3,6 +3,7 @@ name: dhapi-automation-buy
 on:
   schedule:
     - cron: '45 09 * * 6'
+  workflow_dispatch:
 
 jobs:
   dhapi-automation-buy:

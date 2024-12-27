@@ -3,6 +3,7 @@ name: dhapi-automation-show-balance
 on:
   schedule:
     - cron: '45 09 * * 5'
+  workflow_dispatch:
 
 jobs:
   dhapi-automation-show-balance:
